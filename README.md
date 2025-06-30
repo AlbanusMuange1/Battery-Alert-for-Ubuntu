@@ -1,4 +1,3 @@
-
 ---
 
 ````markdown
@@ -112,7 +111,7 @@ battery-alert --threshold 100 --low
 ## 📜 License
 
 MIT License
-© 2025 \[Albanus Muange Mutunga]
+© 2025 Albanus Muange Mutunga
 
 ---
 
@@ -123,6 +122,3 @@ Feel free to fork this repo, suggest improvements, or submit pull requests. Cont
 ```
 
 ---
-
-Let me know if you’d like to include screenshots, badges, or GitHub Actions CI/CD instructions later.
-```
