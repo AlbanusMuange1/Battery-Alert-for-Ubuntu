@@ -1,7 +1,3 @@
-
----
-
-````markdown
 # 🔋 Battery Alert for Ubuntu
 
 **Battery Alert** is a lightweight desktop utility written in Python to notify you when:
@@ -30,7 +26,7 @@ Download and install the `.deb` package:
 
 ```bash
 sudo dpkg -i battery-alert.deb
-````
+```
 
 To fix any missing dependencies:
 
@@ -50,17 +46,17 @@ battery-alert --threshold 85 --low
 
 **Options:**
 
-| Flag          | Description                        | Default  |
-| ------------- | ---------------------------------- | -------- |
-| `--threshold` | Battery % to alert when too high   | 80       |
-| `--low`       | Also alert if battery is below 30% | Disabled |
+| Flag           | Description                                    | Default |
+|----------------|------------------------------------------------|---------|
+| `--threshold`  | Battery % to alert when too high               | 80      |
+| `--low`        | Also alert if battery is below 30%             | Disabled |
 
 ---
 
 ## 🎵 Sound Alerts
 
-* High battery sound: `~/Sounds/button-1.wav`
-* Low battery sound: `~/Sounds/battery_alert.wav`
+- High battery sound: `~/Sounds/button-1.wav`
+- Low battery sound: `~/Sounds/battery_alert.wav`
 
 You can replace these files with your preferred `.wav` audio clips.
 
@@ -80,10 +76,10 @@ If needed, you can edit this file to change threshold values or sound locations.
 
 ## 🧱 Dependencies
 
-* Python 3
-* `psutil`
-* `zenity`
-* `paplay` (PulseAudio utility)
+- Python 3
+- `psutil`
+- `zenity`
+- `paplay` (PulseAudio utility)
 
 Install them manually if not bundled:
 
@@ -111,15 +107,11 @@ battery-alert --threshold 100 --low
 
 ## 📜 License
 
-MIT License
-© 2025 Albanus Muange Mutunga
+MIT License  
+© 2025 [Albanus Muange Mutunga]
 
 ---
 
 ## 🤝 Contributions
 
 Feel free to fork this repo, suggest improvements, or submit pull requests. Contributions are welcome!
-
-```
-
----
