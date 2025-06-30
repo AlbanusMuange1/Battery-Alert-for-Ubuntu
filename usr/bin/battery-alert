@@ -1,0 +1,135 @@
+#!/usr/bin/env python3
+import argparse
+import time
+import psutil
+import subprocess
+import os
+import signal
+import sys
+
+CHECK_INTERVAL = 10
+DEFAULT_THRESHOLD = 80
+LOW_BATTERY_THRESHOLD = 30
+
+
+HIGH_BEEP_SOUND = '/usr/share/sounds/batteryWarning.wav'
+LOW_BEEP_SOUND = '/usr/share/sounds/battery_alert.wav'
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Battery Alert Script")
+    parser.add_argument("--threshold", type=int, default=DEFAULT_THRESHOLD,
+                        help="Battery percentage threshold to trigger unplug alert (default: 80)")
+    parser.add_argument("--low", action="store_true",
+                        help="Enable low battery alert when below 30%%")
+    return parser.parse_args()
+
+def is_charger_plugged():
+    battery = psutil.sensors_battery()
+    return battery and battery.power_plugged
+
+def get_battery_percent():
+    battery = psutil.sensors_battery()
+    return battery.percent if battery else None
+
+def play_sound_loop(sound_path):
+    if not os.path.isfile(sound_path):
+        print(f"[ERROR] Sound file not found: {sound_path}", file=sys.stderr)
+        return None
+    try:
+        return subprocess.Popen(
+            ['bash', '-c', f'while true; do paplay {sound_path!r}; sleep 2; done'],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            preexec_fn=os.setsid
+        )
+    except Exception as e:
+        print(f"[ERROR] Failed to start sound loop: {e}", file=sys.stderr)
+        return None
+
+def show_zenity_alert(title, message):
+    try:
+        return subprocess.Popen(
+            [
+                'zenity', '--warning', '--title', title,
+                '--text', message, '--width=300', '--height=100'
+            ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+    except Exception as e:
+        print(f"[ERROR] Failed to show alert: {e}", file=sys.stderr)
+        return None
+
+def stop_process(proc):
+    if proc:
+        try:
+            os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+        except Exception:
+            proc.terminate()
+        proc.wait(timeout=3)
+
+def main():
+    args = parse_args()
+    unplug_threshold = args.threshold
+    enable_low_alert = args.low
+
+    high_beep_proc = None
+    high_alert_proc = None
+    low_beep_proc = None
+    low_alert_proc = None
+
+    print(f"[INFO] Battery alert started. Unplug at: {unplug_threshold}%, "
+          f"Low battery alert: {'ON' if enable_low_alert else 'OFF'}")
+
+    try:
+        while True:
+            percent = get_battery_percent()
+            plugged = is_charger_plugged()
+
+            if percent is None:
+                print("[WARNING] Unable to read battery info. Retrying...")
+                time.sleep(CHECK_INTERVAL)
+                continue
+
+            if percent >= unplug_threshold and plugged:
+                if not high_beep_proc or high_beep_proc.poll() is not None:
+                    high_beep_proc = play_sound_loop(HIGH_BEEP_SOUND)
+                if not high_alert_proc or high_alert_proc.poll() is not None:
+                    high_alert_proc = show_zenity_alert(
+                        "Battery Alert",
+                        "Battery is above threshold!\nPlease unplug the charger."
+                    )
+            else:
+                stop_process(high_beep_proc)
+                high_beep_proc = None
+                stop_process(high_alert_proc)
+                high_alert_proc = None
+
+
+            if enable_low_alert and percent <= LOW_BATTERY_THRESHOLD and not plugged:
+                if not low_beep_proc or low_beep_proc.poll() is not None:
+                    low_beep_proc = play_sound_loop(LOW_BEEP_SOUND)
+                if not low_alert_proc or low_alert_proc.poll() is not None:
+                    low_alert_proc = show_zenity_alert(
+                        "Low Battery Warning",
+                        f"Battery is low ({percent}%).\nPlease plug in the charger."
+                    )
+            else:
+                stop_process(low_beep_proc)
+                low_beep_proc = None
+                stop_process(low_alert_proc)
+                low_alert_proc = None
+
+            time.sleep(CHECK_INTERVAL)
+
+    except KeyboardInterrupt:
+        print("\n[INFO] Battery alert stopped by user.")
+    finally:
+        stop_process(high_beep_proc)
+        stop_process(high_alert_proc)
+        stop_process(low_beep_proc)
+        stop_process(low_alert_proc)
+
+if __name__ == "__main__":
+    main()

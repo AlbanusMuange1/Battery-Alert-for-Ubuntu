@@ -1,0 +1,10 @@
+Package: battery-alert
+Version: 1.0
+Section: utils
+Priority: optional
+Architecture: all
+Depends: python3, python3-psutil, zenity, pulseaudio-utils
+Maintainer: Albanus Muange albausmuangemutunga@gmail.com
+Description: Battery Alert System
+ A desktop notifier that alerts when the battery is above or below specific thresholds.
+

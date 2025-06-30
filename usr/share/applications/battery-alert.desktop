@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Battery Alert
+Exec=/usr/bin/battery-alert --threshold 85 --low
+Icon=utilities-power
+Comment=Notify when battery is too high or low
+Terminal=false
+Categories=Utility;
+X-GNOME-Autostart-enabled=true
